@@ -1,6 +1,6 @@
 {
   "name": "prepare-response",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Prepare a text resposne to be efficiently sent",
   "keywords": [],
   "files": [
