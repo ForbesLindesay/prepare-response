@@ -75,11 +75,11 @@ PreparedResponse.prototype.send = function (req, res, next) {
   //add gzip
   if (supportsGzip(req) && this.gzippedBody) {
     res.setHeader('Content-Encoding', 'gzip');
-    res.setHeader('Content-Length', this.gzippedBody.length);
+    // res.setHeader('Content-Length', this.gzippedBody.length);
     if ('HEAD' === req.method) res.end();
     else res.end(this.gzippedBody);
   } else {
-    res.setHeader('Content-Length', this.body.length);
+    // res.setHeader('Content-Length', this.body.length);
     if ('HEAD' === req.method) res.end();
     else res.end(this.body);
   }
