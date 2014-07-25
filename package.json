@@ -9,8 +9,9 @@
     "package.json"
   ],
   "dependencies": {
+    "mime": "~1.2.11",
     "ms": "~0.6.2",
-    "mime": "~1.2.11"
+    "promise": "^5.0.0"
   },
   "devDependencies": {
     "testit": "~1.2.0",
