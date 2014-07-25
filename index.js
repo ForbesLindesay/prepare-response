@@ -20,7 +20,7 @@ function prepareResponse(body, headers, options) {
       else return resolve(res);
     });
   }).then(function (gzippedBody) {
-    if (gzippedBody.length >= body.length) {
+    if (typeof options.gzip !== 'boolean' && gzippedBody.length >= body.length) {
       options.gzip = false;
     }
     return new PreparedResponse(body,
