@@ -12,13 +12,21 @@ function prepareResponse(body, headers, options) {
   if (!Buffer.isBuffer(body)) {
     return Promise.reject(new TypeError('Text must be either a buffer or a string'));
   }
+  options = options || {};
   var result = new Promise(function (resolve, reject) {
+    if (options.gzip === false) return resolve(null);
     zlib.gzip(body, function (err, res) {
       if (err) return reject(err);
       else return resolve(res);
     });
   }).then(function (gzippedBody) {
-    return new PreparedResponse(body, gzippedBody, headers, options);
+    if (gzippedBody.length >= body.length) {
+      options.gzip = false;
+    }
+    return new PreparedResponse(body,
+                                options.gzip !== false ? gzippedBody : null,
+                                headers,
+                                options);
   });
   result.send = function (req, res, next) {
     return result.done(function (response) {
