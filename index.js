@@ -2,33 +2,34 @@
 
 var crypto = require('crypto');
 var zlib = require('zlib');
+var Promise = require('promise');
 var ms = require('ms');
 var mime = require('mime');
 
 module.exports = prepareResponse;
-function prepareResponse(body, headers) {
-  return new PreparedResponse(body, headers);
-}
-function PreparedResponse(body, headers) {
+function prepareResponse(body, headers, options) {
   if (typeof body === 'string') body = new Buffer(body);
   if (!Buffer.isBuffer(body)) {
-    throw new TypeError('Text must be either a buffer or a string');
+    return Promise.reject(new TypeError('Text must be either a buffer or a string'));
   }
-  this.body = body;
-  this.gzippedBody = null;
-  this.waiting = [];
-  zlib.gzip(body, function (err, res) {
-    if (err) {
-      console.error(err.stack);
-    } else if (res.length < this.body.length) {
-      this.gzippedBody = res;
-    }
-    var waiting = this.waiting;
-    this.waiting = null;
-    waiting.forEach(function (fn) {
-      fn();
+  var result = new Promise(function (resolve, reject) {
+    zlib.gzip(body, function (err, res) {
+      if (err) return reject(err);
+      else return resolve(res);
     });
-  }.bind(this));
+  }).then(function (gzippedBody) {
+    return new PreparedResponse(body, gzippedBody, headers, options);
+  });
+  result.send = function (req, res, next) {
+    return result.done(function (response) {
+      response.send(req, res);
+    }, next);
+  };
+  return result;
+}
+function PreparedResponse(body, gzippedBody, headers, options) {
+  this.body = body;
+  this.gzippedBody = gzippedBody;
   this.etag = md5(body);
 
   this.headers = Object.keys(headers || {}).map(function (header) {
@@ -45,41 +46,40 @@ function PreparedResponse(body, headers) {
     }
     return new Header(header, value);
   });
+  this.options = options || {};
 }
-PreparedResponse.prototype.send = function (req, res, next) {
-  if (this.waiting) {
-    return this.waiting.push(this.send.bind(this, req, res, next));
-  }
-
+PreparedResponse.prototype.send = function (req, res) {
   this.headers.forEach(function (header) {
     header.set(res);
   });
 
-  // vary
-  if (!res.getHeader('Vary')) {
-    res.setHeader('Vary', 'Accept-Encoding');
-  } else if (!~res.getHeader('Vary').indexOf('Accept-Encoding')) {
-    res.setHeader('Vary', res.getHeader('Vary') + ', Accept-Encoding');
-  }
+  if (this.options.etag !== false) {
+    // vary
+    if (!res.getHeader('Vary')) {
+      res.setHeader('Vary', 'Accept-Encoding');
+    } else if (!~res.getHeader('Vary').indexOf('Accept-Encoding')) {
+      res.setHeader('Vary', res.getHeader('Vary') + ', Accept-Encoding');
+    }
 
-  //check old etag
-  if (req.headers['if-none-match'] === this.etag) {
-    res.statusCode = 304;
-    res.end();
-    return;
-  }
+    //check old etag
+    if (req.headers['if-none-match'] === this.etag) {
+      res.statusCode = 304;
+      res.end();
+      return;
+    }
 
-  //add new etag
-  res.setHeader('ETag', this.etag);
+    //add new etag
+    res.setHeader('ETag', this.etag);
+  }
 
   //add gzip
-  if (supportsGzip(req) && this.gzippedBody) {
+  if (this.options.gzip !== false && supportsGzip(req)) {
     res.setHeader('Content-Encoding', 'gzip');
-    // res.setHeader('Content-Length', this.gzippedBody.length);
+    res.setHeader('Content-Length', this.gzippedBody.length);
     if ('HEAD' === req.method) res.end();
     else res.end(this.gzippedBody);
   } else {
-    // res.setHeader('Content-Length', this.body.length);
+    res.setHeader('Content-Length', this.body.length);
     if ('HEAD' === req.method) res.end();
     else res.end(this.body);
   }

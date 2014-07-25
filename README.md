@@ -20,7 +20,10 @@ var prepare = require('prepare-response');
 
 var app = express();
 
-var html = prepare('<!DOCTYPE html><html></html>', {'content-type': 'html'});
+var html = prepare('<!DOCTYPE html><html></html>', {'content-type': 'html'}, {
+  etag: true, // default: true
+  gzip: true // default: true
+});
 var script = prepare('alert("foo");', {'content-type': 'js', 'cache-control': '1 year'});
 
 app.get('/', function (req, res, next) {
