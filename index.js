@@ -62,13 +62,6 @@ PreparedResponse.prototype.send = function (req, res) {
   });
 
   if (this.options.etag !== false) {
-    // vary
-    if (!res.getHeader('Vary')) {
-      res.setHeader('Vary', 'Accept-Encoding');
-    } else if (!~res.getHeader('Vary').indexOf('Accept-Encoding')) {
-      res.setHeader('Vary', res.getHeader('Vary') + ', Accept-Encoding');
-    }
-
     //check old etag
     if (req.headers['if-none-match'] === this.etag) {
       res.statusCode = 304;
@@ -81,6 +74,14 @@ PreparedResponse.prototype.send = function (req, res) {
   }
 
   //add gzip
+  if (this.options.gzip !== false) {
+    // vary
+    if (!res.getHeader('Vary')) {
+      res.setHeader('Vary', 'Accept-Encoding');
+    } else if (!~res.getHeader('Vary').indexOf('Accept-Encoding')) {
+      res.setHeader('Vary', res.getHeader('Vary') + ', Accept-Encoding');
+    }
+  }
   if (this.options.gzip !== false && supportsGzip(req)) {
     res.setHeader('Content-Encoding', 'gzip');
     res.setHeader('Content-Length', this.gzippedBody.length);
