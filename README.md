@@ -3,7 +3,7 @@
 Prepare a text resposne to be efficiently sent.  This is useful when you want to completly cache a specific response in memory and handle etags and gzip.
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/prepare-response/master.svg)](https://travis-ci.org/ForbesLindesay/prepare-response)
-[![Dependency Status](https://img.shields.io/gemnasium/ForbesLindesay/prepare-response.svg)](https://gemnasium.com/ForbesLindesay/prepare-response)
+[![Dependency Status](https://img.shields.io/david/ForbesLindesay/prepare-response.svg)](https://david-dm.org/ForbesLindesay/prepare-response)
 [![NPM version](https://img.shields.io/npm/v/prepare-response.svg)](https://www.npmjs.org/package/prepare-response)
 
 ## Installation
