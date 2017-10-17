@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "concat-stream": "^1.6.0",
-    "testit": "^2.1.4"
+    "testit": "^3.0.0"
   },
   "scripts": {
     "test": "node test"
