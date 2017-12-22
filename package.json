@@ -9,7 +9,7 @@
     "package.json"
   ],
   "dependencies": {
-    "mime": "^2.0.3",
+    "mime": "2.0.3",
     "ms": "^2.0.0",
     "promise": "^8.0.0"
   },
