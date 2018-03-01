@@ -14,7 +14,7 @@
     "promise": "^8.0.0"
   },
   "devDependencies": {
-    "concat-stream": "^1.6.0",
+    "concat-stream": "1.6.0",
     "testit": "^3.0.0"
   },
   "scripts": {
