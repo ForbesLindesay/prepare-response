@@ -50,7 +50,7 @@ function PreparedResponse(body, gzippedBody, headers, options) {
       }
     }
     if (header.toLowerCase() === 'content-type' && value.indexOf('/') === -1) {
-      value = mime.lookup(value);
+      value = mime.getType(value);
     }
     return new Header(header, value);
   });
